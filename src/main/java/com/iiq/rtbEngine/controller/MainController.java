@@ -14,57 +14,60 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MainController {
 
-	@Autowired
-	private DataCache cache;
+    @Autowired
+    private DataCache cache;
 
-	@Autowired
-	private DbManager dbManager;
+    @Autowired
+    private DbManager dbManager;
 
-	private static final String ATTRIBUTE_ID_VALUE = "atid";
-	private static final String PROFILE_ID_VALUE = "pid";
-	
-	private enum UrlParam {
-		ATTRIBUTE_ID(ATTRIBUTE_ID_VALUE),
-		PROFILE_ID(PROFILE_ID_VALUE),
-		;
-		
-		private final String value;
-		
-		private UrlParam(String value) {
-			this.value = value;
-		}
-		
-		public String getValue() {
-			return value;
-		}
-	}
-	
+    private static final String ATTRIBUTE_ID_VALUE = "atid";
+    private static final String PROFILE_ID_VALUE = "pid";
 
-	@GetMapping("/attribute")
-	public ResponseEntity<String> attributeRequest(HttpServletRequest request, HttpServletResponse response,
-											 @RequestParam(name = ATTRIBUTE_ID_VALUE, required = false) Integer attributeId,
-											 @RequestParam(name = PROFILE_ID_VALUE,   required = false) Integer profileId) {
+    private enum UrlParam {
+        ATTRIBUTE_ID(ATTRIBUTE_ID_VALUE),
+        PROFILE_ID(PROFILE_ID_VALUE),
+        ;
+
+        private final String value;
+
+        private UrlParam(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
 
 
-		return  ResponseEntity.ok("Implement your code here .... ");
+    @GetMapping("/attribute")
+    public ResponseEntity<String> attributeRequest(HttpServletRequest request, HttpServletResponse response,
+                                                   @RequestParam(name = ATTRIBUTE_ID_VALUE, required = true) Integer attributeId,
+                                                   @RequestParam(name = PROFILE_ID_VALUE, required = true) Integer profileId) {
+        boolean didProfileUpdate = dbManager.updateProfileAttribute(profileId, attributeId);
 
-	}
+        if (didProfileUpdate) {
+            return ResponseEntity.ok("Saved");
+        } else {
+            return ResponseEntity.status(500).body("Profile not saved");
+        }
 
-	@GetMapping("/bid")
-	public ResponseEntity<String> bidRequest(HttpServletRequest request, HttpServletResponse response,
-												@RequestParam(name = PROFILE_ID_VALUE,   required = false) Integer profileId) {
+    }
+
+    @GetMapping("/bid")
+    public ResponseEntity<String> bidRequest(HttpServletRequest request, HttpServletResponse response,
+                                             @RequestParam(name = PROFILE_ID_VALUE, required = false) Integer profileId) {
+        
+
+        return ResponseEntity.ok("Implement your code here .... ");
+
+    }
+
+    /**
+     *
+     *   GOOD LUCK !
+     *
+     */
 
 
-		return  ResponseEntity.ok("Implement your code here .... ");
-
-	}
-
-	/**
-	 *
-	 *   GOOD LUCK !
-	 *
-	 */
-
-
-	
 }

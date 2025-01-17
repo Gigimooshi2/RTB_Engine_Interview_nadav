@@ -150,9 +150,11 @@ public class DbManager {
 	 * An API for updating Profiles table in DB
 	 * @param profileId
 	 * @param attributeId
+	 *
+	 * @return an update flag to indicate whether a profile has been updated or not through this action
 	 */
-	public void updateProfileAttribute(int profileId, int attributeId) {
-		profilesDao.updateTable(profileId +"", attributeId+"");
+	public boolean updateProfileAttribute(int profileId, int attributeId) {
+		return profilesDao.updateTable(profileId +"", attributeId+"");
 	}
 
 	/**
@@ -189,5 +191,9 @@ public class DbManager {
 	 */
 	public Profile getProfile(int profileID){
 		return new Profile(profileID , profilesDao.getProfileAttributes(profileID));
+	}
+
+	public Boolean isProfileExist(int profileID){
+		return !profilesDao.getProfile(profileID).isEmpty();
 	}
 }

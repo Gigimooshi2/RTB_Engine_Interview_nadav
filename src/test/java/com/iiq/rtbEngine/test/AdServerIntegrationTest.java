@@ -29,18 +29,18 @@ public class AdServerIntegrationTest {
     public void testProfileAttributeRequest() {
 
       //collecting attributes
-        String url = "http://localhost:" + port + "/api?act=0&pid=3&atid=20";
+        String url = "http://localhost:" + port + "/attribute?act=0&pid=3&atid=20";
         String expectedResponse = "Saved"; // Assuming a successful response for profile attribute request
         String response = restTemplate.getForObject(url, String.class);
         assertEquals(expectedResponse, response);
-        url = "http://localhost:" + port + "/api?act=0&pid=3&atid=21";
+        url = "http://localhost:" + port + "/attribute?act=0&pid=3&atid=21";
         response = restTemplate.getForObject(url, String.class);
         assertEquals(expectedResponse, response);
-        url = "http://localhost:" + port + "/api?act=0&pid=3&atid=22";
+        url = "http://localhost:" + port + "/attribute?act=0&pid=3&atid=22";
         response = restTemplate.getForObject(url, String.class);
         assertEquals(expectedResponse, response);
         //running bid requests
-        url = "http://localhost:" + port + "/api?act=1&pid=3";
+        url = "http://localhost:" + port + "/bid?act=1&pid=3";
 
         response = restTemplate.getForObject(url, String.class);
         assertEquals( "103" , response);
@@ -63,19 +63,19 @@ public class AdServerIntegrationTest {
 
 
         //Adding another campaign
-        url = "http://localhost:" + port + "/api?act=0&pid=3&atid=25";
+        url = "http://localhost:" + port + "/attribute?act=0&pid=3&atid=25";
         response = restTemplate.getForObject(url, String.class);
         assertEquals( "Saved" , response);
 
-        url = "http://localhost:" + port + "/api?act=1&pid=3";
+        url = "http://localhost:" + port + "/attribute?act=1&pid=3";
         response = restTemplate.getForObject(url, String.class);
         assertEquals( "capped" , response);
 
-        url = "http://localhost:" + port + "/api?act=0&pid=3&atid=26";
+        url = "http://localhost:" + port + "/attribute?act=0&pid=3&atid=26";
         response = restTemplate.getForObject(url, String.class);
         assertEquals( "Saved" , response);
 
-        url = "http://localhost:" + port + "/api?act=1&pid=3";
+        url = "http://localhost:" + port + "/attribute?act=1&pid=3";
         response = restTemplate.getForObject(url, String.class);
         assertEquals( "104" , response);
         response = restTemplate.getForObject(url, String.class);
@@ -85,11 +85,11 @@ public class AdServerIntegrationTest {
 
 
         //Add another profile to have campaigns 101,102,103
-        restTemplate.getForObject("http://localhost:" + port + "/api?act=0&pid=1&atid=20", String.class);
-        restTemplate.getForObject("http://localhost:" + port + "/api?act=0&pid=1&atid=21", String.class);
-        restTemplate.getForObject("http://localhost:" + port + "/api?act=0&pid=1&atid=22", String.class);
+        restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=1&atid=20", String.class);
+        restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=1&atid=21", String.class);
+        restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=1&atid=22", String.class);
 
-        url = "http://localhost:" + port + "/api?act=1&pid=1";
+        url = "http://localhost:" + port + "/attribute?act=1&pid=1";
         response = restTemplate.getForObject(url, String.class);
         assertEquals( "103" , response);
     }
@@ -97,12 +97,12 @@ public class AdServerIntegrationTest {
     @Test
     public void multipleRequestParallel() throws ExecutionException, InterruptedException {
 
-        restTemplate.getForObject("http://localhost:" + port + "/api?act=0&pid=5&atid=20", String.class);
-        restTemplate.getForObject("http://localhost:" + port + "/api?act=0&pid=5&atid=21", String.class);
-        restTemplate.getForObject("http://localhost:" + port + "/api?act=0&pid=5&atid=22", String.class);
+        restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=5&atid=20", String.class);
+        restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=5&atid=21", String.class);
+        restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=5&atid=22", String.class);
 
 
-        String url = "http://localhost:" + port + "/api?act=1&pid=5";
+        String url = "http://localhost:" + port + "/attribute?act=1&pid=5";
 
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(10); // Set the core pool size

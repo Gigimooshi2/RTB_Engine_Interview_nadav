@@ -35,12 +35,29 @@ public class ProfilesDao {
 		}
 	}
 	
-	public void updateTable(String profileId, String attributeId) {
+	public boolean updateTable(String profileId, String attributeId) {
+		boolean updateFlag = false;
 		try {
-			h2Db.executeUpdate(String.format(UPDATE_STATEMENT, profileId, attributeId));
+			int rowsUpdated = h2Db.executeUpdate(String.format(UPDATE_STATEMENT, profileId, attributeId));
+			if (rowsUpdated > 0){
+				updateFlag = true;
+				logger.info("Profile ID "+profileId+" updated it's attribute to " +attributeId);
+			}
 		} catch (Exception e) {
 			logger.error("Error while trying to update table "+PROFILES_TABLE_NAME+" with profileId="+profileId+" attributeId"+attributeId,e);
 		}
+		return updateFlag;
+	}
+
+	public List<Map<String, String>> getProfile(int profileId) {
+		List<Map<String, String>> result = List.of();
+		try {
+			result = h2Db.executeQuery(String.format(SELECT_STATEMENT, profileId+""));
+		} catch (Exception e) {
+			logger.error("Got exception on : getProfile" , e );
+		}
+
+		return result;
 	}
 	
 	public Set<Integer> getProfileAttributes(int profileId) {

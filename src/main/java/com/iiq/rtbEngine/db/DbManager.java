@@ -32,7 +32,7 @@ public class DbManager {
 	private ProfileCampaignFrequencyDao profileCampaignFrequencyDao;
 	
 	private static final String CSV_DELIM = ",";
-	private static final String BASE_PATH = "/Users/noambenishay/IdeaProjects/Java_Interviews/RTB_Engine_Interview/src/main/resources/static/"; // "./resources/";	//should be D:/ on AWS workspace
+	private static final String BASE_PATH = "./resources/"; // "./resources/";	//should be D:/ on AWS workspace
 	private static final String CAMPAIGNS_TABLE_INITIALIZATION_FILE = "campaigns_init.csv";
 	private static final String CAMPAIGNS_CAPACITY_TABLE_INITIALIZATION_FILE = "campaign_config_init.csv";
 	

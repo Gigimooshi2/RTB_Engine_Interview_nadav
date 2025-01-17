@@ -67,7 +67,7 @@ public class AdServerIntegrationTest {
         response = restTemplate.getForObject(url, String.class);
         assertEquals( "Saved" , response);
 
-        url = "http://localhost:" + port + "/attribute?act=1&pid=3";
+        url = "http://localhost:" + port + "/bid?act=1&pid=3";
         response = restTemplate.getForObject(url, String.class);
         assertEquals( "capped" , response);
 
@@ -75,7 +75,7 @@ public class AdServerIntegrationTest {
         response = restTemplate.getForObject(url, String.class);
         assertEquals( "Saved" , response);
 
-        url = "http://localhost:" + port + "/attribute?act=1&pid=3";
+        url = "http://localhost:" + port + "/bid?act=1&pid=3";
         response = restTemplate.getForObject(url, String.class);
         assertEquals( "104" , response);
         response = restTemplate.getForObject(url, String.class);
@@ -89,7 +89,7 @@ public class AdServerIntegrationTest {
         restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=1&atid=21", String.class);
         restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=1&atid=22", String.class);
 
-        url = "http://localhost:" + port + "/attribute?act=1&pid=1";
+        url = "http://localhost:" + port + "/bid?act=1&pid=1";
         response = restTemplate.getForObject(url, String.class);
         assertEquals( "103" , response);
     }
@@ -102,7 +102,7 @@ public class AdServerIntegrationTest {
         restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=5&atid=22", String.class);
 
 
-        String url = "http://localhost:" + port + "/attribute?act=1&pid=5";
+        String url = "http://localhost:" + port + "/bid?act=1&pid=5";
 
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(10); // Set the core pool size

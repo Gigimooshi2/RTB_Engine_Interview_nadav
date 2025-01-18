@@ -121,16 +121,14 @@ public class MainController {
     public ResponseEntity<String> bidRequest(HttpServletRequest request, HttpServletResponse response,
                                              @RequestParam(name = PROFILE_ID_VALUE, required = false) Integer profileId) {
         Integer resultCampaignId;
-        synchronized (Class.class) {
-            if (!profileCampaignCache.checkIfAnyMatchFound(profileId)) {
-                return ResponseEntity.status(404).body("unmatched");
-            }
-            resultCampaignId = profileCampaignCache.getNextCampaign(profileId);
-            if (resultCampaignId == null) {
-                return ResponseEntity.status(409).body("capped");
-            }
-            return ResponseEntity.ok(resultCampaignId.toString());
+        if (!profileCampaignCache.checkIfAnyMatchFound(profileId)) {
+            return ResponseEntity.status(404).body("unmatched");
         }
+        resultCampaignId = profileCampaignCache.getNextCampaign(profileId);
+        if (resultCampaignId == null) {
+            return ResponseEntity.status(409).body("capped");
+        }
+        return ResponseEntity.ok(resultCampaignId.toString());
     }
 
     /**

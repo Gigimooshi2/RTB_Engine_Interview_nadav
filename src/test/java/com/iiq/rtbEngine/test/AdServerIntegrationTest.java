@@ -24,6 +24,50 @@ public class AdServerIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Test
+    public void testAddingCampaignInTheMiddleOfFetching(){
+
+        //collecting attributes
+        String url = "http://localhost:" + port + "/attribute?act=0&pid=3&atid=20";
+        String expectedResponse = "Saved"; // Assuming a successful response for profile attribute request
+        String response = restTemplate.getForObject(url, String.class);
+        assertEquals(expectedResponse, response);
+        url = "http://localhost:" + port + "/attribute?act=0&pid=3&atid=21";
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals(expectedResponse, response);
+        url = "http://localhost:" + port + "/attribute?act=0&pid=3&atid=22";
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals(expectedResponse, response);
+        //running bid requests
+        url = "http://localhost:" + port + "/bid?act=1&pid=3";
+
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals( "103" , response);
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals( "103" , response);
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals( "102" , response);
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals( "102" , response);
+
+        //Adding another campaign
+        url = "http://localhost:" + port + "/attribute?act=0&pid=3&atid=25";
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals( "Saved" , response);
+
+        url = "http://localhost:" + port + "/bid?act=1&pid=3";
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals( "101" , response);
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals( "101" , response);
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals( "101" , response);
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals( "capped" , response);
+        response = restTemplate.getForObject(url, String.class);
+        assertEquals( "capped" , response);
+
+    }
 
     @Test
     public void testProfileAttributeRequest() {
@@ -96,7 +140,7 @@ public class AdServerIntegrationTest {
 
     @Test
     public void multipleRequestParallel() throws ExecutionException, InterruptedException {
-
+        long currentTime = System.currentTimeMillis();
         restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=5&atid=20", String.class);
         restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=5&atid=21", String.class);
         restTemplate.getForObject("http://localhost:" + port + "/attribute?act=0&pid=5&atid=22", String.class);
@@ -106,12 +150,12 @@ public class AdServerIntegrationTest {
 
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(10); // Set the core pool size
-        executor.setMaxPoolSize(20); // Set the max pool size
+        executor.setMaxPoolSize(200); // Set the max pool size
         executor.setQueueCapacity(25); // Set the queue capacity
         executor.initialize();
 
         HashSet<Future<String>> futures = new HashSet<>();
-        for(int i = 0; i < 20 ; i++)
+        for(int i = 0; i < 200 ; i++)
             futures.add(executor.submit(()->restTemplate.getForObject(url, String.class)));
 
         int countPosBid = 0;
@@ -119,6 +163,7 @@ public class AdServerIntegrationTest {
             if(f.get().equals("101") || f.get().equals("102") || f.get().equals("103"))
                 countPosBid++;
 
+        System.out.println(System.currentTimeMillis() - currentTime);
         assertEquals( 7 , countPosBid);
     }
 

@@ -43,7 +43,7 @@ public class DataCache {
             int campaignId = entry.getKey();
             List<Integer> attributes = entry.getValue();
             CampaignConfig config = campaignConfig.get(entry.getKey());
-            Campaign campaign = new Campaign(campaignId, attributes,config.capacity() , config.priority());
+            Campaign campaign = new Campaign(campaignId,config.capacity() , config.priority(),attributes);
             campaignIDtoCampaign.put(campaignId, campaign);
             allCampaigns.add(campaign);
         }

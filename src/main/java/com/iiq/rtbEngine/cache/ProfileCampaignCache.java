@@ -66,10 +66,11 @@ public class ProfileCampaignCache {
      * This function returns the next campaign to the client,
      * In addition, by using the {@link Campaign#capacity} we decide how many times profile will be forwarded
      * the ad before we move on to the next Campaign.
+     *
      * @param profileId - The id of the profile who we will reference the cache to.
      * @return The ID of the next relevant campaign.
      */
-    public synchronized Integer getNextCampaign(int profileId) {
+    public Integer getNextCampaign(int profileId) {
         LinkedList<Campaign> campaigns = profileCampaigns.get(profileId);
 
         if (campaigns == null || campaigns.isEmpty()) {

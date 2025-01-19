@@ -22,6 +22,7 @@ public class ProfileCampaignCache {
     /**
      * In order to know if no match was ever found or if the cache is just empty we need an indicator flag
      * for each profile to be declared in advanced.
+     *
      * @param profileId - the id of the profile we're interested to know if it ever got a match.
      * @return boolean value if a match was ever found for this profile.
      */
@@ -31,35 +32,45 @@ public class ProfileCampaignCache {
 
     /**
      * This function sets the pre-made list of campaigns which will be forwarded to the client during the bidding.
+     *
      * @param profileId - The id of the profile whose cache will be set.
      * @param campaigns - the list of the given campaigns.
+     * @return returns a boolean value if both operations of putting the value in the cache were successful
      */
-    public void loadProfileCampaignsData(int profileId, List<Campaign> campaigns) {
+    public boolean loadProfileCampaignsData(int profileId, List<Campaign> campaigns) {
         if (campaigns.isEmpty()) {
-            this.matchFound.put(profileId, false);
+            matchFound.put(profileId, false);
         }
-        this.matchFound.put(profileId, true);
-        profileCampaigns.put(profileId, new LinkedList<>(campaigns));
+        try {
+            matchFound.put(profileId, true);
+            profileCampaigns.put(profileId, new LinkedList<>(campaigns));
+            return true;
+        }
+        catch(Exception e){
+            // log exception with a logger..
+            return false;
+        }
     }
 
     /**
      * This function appends to the existing cache add new campaigns and resorts them by the rules of the given comparator.
      * if no campaign exists in cache, the function calls {@link #loadProfileCampaignsData}
-     * @param profileId - The id of the profile whose cache will be changed.
-     * @param campaigns - the list of the new given campaigns.
+     *
+     * @param profileId  - The id of the profile whose cache will be changed.
+     * @param campaigns  - the list of the new given campaigns.
      * @param comparator - the comparator which will declare the rule set of the merge
+     * @return returns a boolean value if the cache was updated or created correctly.
      */
-    public void appendProfileCampaignsData(int profileId, List<Campaign> campaigns, Comparator<Campaign> comparator) {
+    public boolean appendProfileCampaignsData(int profileId, List<Campaign> campaigns, Comparator<Campaign> comparator) {
         LinkedList<Campaign> currentCampaigns = profileCampaigns.get(profileId);
-        if (currentCampaigns == null || currentCampaigns.isEmpty()){
-            loadProfileCampaignsData(profileId,campaigns);
-            return;
+        if (currentCampaigns == null || currentCampaigns.isEmpty()) {
+            return loadProfileCampaignsData(profileId, campaigns);
         }
-        profileCampaigns.put(profileId,
+        return profileCampaigns.put(profileId,
                 new LinkedList<>(
-                        Stream.concat(campaigns.stream(),currentCampaigns.stream())
+                        Stream.concat(campaigns.stream(), currentCampaigns.stream())
                                 .sorted(comparator)
-                                .collect(Collectors.toList())));
+                                .collect(Collectors.toList()))) != null;
     }
 
     /**

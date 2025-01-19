@@ -8,6 +8,8 @@ import com.iiq.rtbEngine.db.models.Campaign;
 import com.iiq.rtbEngine.db.models.Profile;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 @RestController
@@ -28,7 +29,8 @@ public class MainController {
     @Autowired
     private DbManager dbManager;
 
-    private final ConcurrentHashMap<Integer, Object> lockMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, Object> bidProfileLockMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, Object> attributeProfileLockMap = new ConcurrentHashMap<>();
 
     private final CampaignsComparator campaignsComparator = new CampaignsComparator();
 
@@ -82,28 +84,27 @@ public class MainController {
      * @param profileId   - The id of the profile.
      * @return "Saved" (HTTP 200) - If the attribute addition was successful.
      * "Profile not saved" (HTTP 500) - If for some reason the profiles attribution addition failed.
-     * "Attribute already exists" (HTTP 304) - If the attribute given already exists.
      */
     @GetMapping("/attribute")
     public ResponseEntity<String> attributeRequest(HttpServletRequest request, HttpServletResponse response,
                                                    @RequestParam(name = ATTRIBUTE_ID_VALUE, required = true) Integer attributeId,
                                                    @RequestParam(name = PROFILE_ID_VALUE, required = true) Integer profileId) {
         Profile profile = dbManager.getProfile(profileId);
-        if (profile.attributes().contains(attributeId)) {
-            return ResponseEntity.status(304).body("Attribute already exists");
-        }
         boolean didProfileUpdate = dbManager.updateProfileAttribute(profileId, attributeId);
         if (didProfileUpdate) {
-            // Add attribute to local profile instead of going to DB again.
+            // Add attribute to local profile instead of going to DB again,
+            // this keeps the context of the attribute addition only to the current running thread.
             profile.attributes().add(attributeId);
 
             List<Campaign> profileCampaignsList = createProfileCampaignsList(profile, attributeId);
-            profileCampaignCache.appendProfileCampaignsData(profile.profileID(), profileCampaignsList, campaignsComparator);
 
-            return ResponseEntity.ok("Saved");
-        } else {
-            return ResponseEntity.status(500).body("Profile not saved");
+            if((boolean)attributeProfileLockMap.compute(profileId, (key, val) ->
+                    profileCampaignCache.appendProfileCampaignsData(profile.profileID(), profileCampaignsList, campaignsComparator))){
+                return ResponseEntity.ok("Saved");
+            }
         }
+
+        return ResponseEntity.status(500).body("Profile not saved");
 
     }
 
@@ -112,7 +113,7 @@ public class MainController {
      * All the given campaigns are pre-determined in a cache declared at {@link #attributeRequest(HttpServletRequest, HttpServletResponse, Integer, Integer)}
      * and are returned to the profile in their given order.
      * <p>
-     * In addition, we're using {@link #lockMap} to keep a thread safe synchronization relative to each profile
+     * In addition, we're using {@link #bidProfileLockMap} to keep a thread safe synchronization relative to each profile
      *
      * @param profileId - the id of the profile who'll be forwarded the campaign.
      * @return "<The relevant campaign ID>" - assuming the profile has campaigns loaded up in cache we'll return him the next campaign by it's ID.
@@ -127,7 +128,7 @@ public class MainController {
         }
 
         Integer resultCampaignId;
-        resultCampaignId = (Integer) lockMap.compute(profileId, (pid, value) ->
+        resultCampaignId = (Integer) bidProfileLockMap.compute(profileId, (pid, value) ->
                 profileCampaignCache.getNextCampaign(profileId)
 
         );
